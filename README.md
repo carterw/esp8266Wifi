@@ -31,7 +31,7 @@ Assuming you were able to connect, you can now bring up a browser on your phone 
 
 ![Initial Web Page][image1]
 
-[image1]: https://i.imgur.com/sSpRwn2.png
+[image1]: https://i.imgur.com/4qhg14d.png
 
 The initial page has a *scan button* and an on/off button for what may or may not be an LED on pin 2 just for fun. Press the scan button and the device will spend a few seconds looking for visible access points, then print them to a table.
 
@@ -46,7 +46,9 @@ The table will show;
 
 If you press the radio button associated with an access point you will be sent to a page where you can type in the password and an optional name for that access point.
 
-*image to be placed here*
+![Set password page][image3]
+
+[image3]: https://i.imgur.com/SDWMMO3.png
 
 You will see a *test*, *save*, and the usual *scan* button. 
 
