@@ -1,7 +1,7 @@
 # esp8266Wifi
 The ESP8266 is a pretty amazing IoT device with built-in WiFi capability. It is the size of a postage stamp and  you can get it in single quantity for about 3 bucks on Ebay if you don't mind wiring it up yourself. A development board with breakouts and a USB port is available [on Amazon at 2 for $15](https://www.amazon.com/gp/product/B01IK9GEQG/ref=oh_aui_detailpage_o08_s00?ie=UTF8&psc=1).
 
-This project is a python application that can serve up a little website on the ESP8266 running as a WiFi access point. It can scan for other visible access points, indicates if they are open or require a password, and lets you record their password to a file on the ESP8266. Very cool that a cheap little device with 25kb of program RAM can do this.
+This project is a python application that can serve up a little website on the ESP8266 running as a WiFi access point. It can scan for other visible access points, indicates if they are open or require a password, and lets you record their password to a file on the ESP8266. Very cool that a cheap little device with ~25kb of program RAM can do this.
 
 ## Motivation
 
@@ -11,7 +11,7 @@ For myself, I write Python apps for the 8266 that attempt to connect to a remote
 
 I assume you have at least some minimal ESP8266 developer chops in order to install and run this software.
 
-You must have [Micropython firmware flashed](https://learn.adafruit.com/building-and-running-micropython-on-the-esp8266/overview) to the ESP8266, there are plenty of tutorials around on how to do this. You will also need to have a way to send program files to it. I use [Adafruit ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy) but you may prefer some other technique such as [webrepl](https://micropython.org/webrepl/). Also you will want a serial port terminal app such as Putty so that you can access a command-line Python prompt. And, of course, typically some form of USB-to-serial connection to the 8266 that let's you initially invoke the application.
+You must have [Micropython firmware flashed](https://learn.adafruit.com/building-and-running-micropython-on-the-esp8266/overview) to the ESP8266, there are plenty of tutorials around on how to do this. You will also need to have a way to send program files to it. I use [Adafruit ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy) but you may prefer some other technique such as [webrepl](https://micropython.org/webrepl/). Also you will want a serial port terminal app such as Putty so that you can access a command-line Python prompt. And, of course, typically some form of USB-to-serial connection to the 8266 that lets you initially invoke the application and appropriate device driver software for that connection.
 
 ## Installation
 
@@ -29,7 +29,9 @@ Pick up your cellphone, go to Settings (on Android phones) and look at the avail
 
 Assuming you were able to connect, you can now bring up a browser on your phone - Chrome or whatever - and for the URL you will **enter the IP address 192.168.4.1**. This should bring up the initial web page.
 
-*image to be placed here*
+![Initial Web Page][image1]
+
+[image1]: https://i.imgur.com/sSpRwn2.png
 
 The initial page has a *scan button* and an on/off button for what may or may not be an LED on pin 2 just for fun. Press the scan button and the device will spend a few seconds looking for visible access points, then print them to a table.
 
