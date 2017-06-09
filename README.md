@@ -35,7 +35,9 @@ Assuming you were able to connect, you can now bring up a browser on your phone 
 
 The initial page has a *scan button* and an on/off button for what may or may not be an LED on pin 2 just for fun. Press the scan button and the device will spend a few seconds looking for visible access points, then print them to a table.
 
-*image to be placed here*
+![Scanned page][image2]
+
+[image2]: https://i.imgur.com/4NZWo97.png
 
 The table will show;
 * the access point name (if not hidden)
