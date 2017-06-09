@@ -44,14 +44,14 @@ except AttributeError:
 pwform = ''' 
 <h3>Set access point password</h3>
 <form method='GET' action='/setpw'>
-    SSID: verified = VER<br><br>
-    Password: <input type="text" class="text" name="password" value="PW"><br>
-    Name: <input type="text" class="text" name="apName" value="NAME" placeholder="optional"><br>
+    _SSID: verified = _VER<br><br>
+    Password: <input type="text" class="text" name="password" value="_PW"><br>
+    Name: <input type="text" class="text" name="apName" value="_NAME" placeholder="optional"><br>
     <span>
     <input type="submit" name="testpw" value="Test">
     <input type="submit" name="savepw" value="Save">
     </span>
-    <input type="hidden" name="ssid" value="SSID">
+    <input type="hidden" name="ssid" value="_SSID">
 </form> 
 '''
 
@@ -93,6 +93,7 @@ def emitScanTable(socket):
 
 def emitPWform(socket, rawQuery):
     asString = str(rawQuery, "utf-8")
+    # print('emitPWform>>> ', asString)
     parsedQuery = queryParse(asString)
     # print('emitPWform>>> ', parsedQuery)
     ssid = parsedQuery['radioSet']
@@ -100,19 +101,28 @@ def emitPWform(socket, rawQuery):
 
     actionButton = "<input type='submit' value='Submit'>"
     pwf = pwform
-    pwf = pwf.replace('SSID', ssid)
+    # there's probably a more clever way to do the following...
+    pwf = pwf.replace('_SSID', ssid)
     if 'password' in point:
-        pwf = pwf.replace('PW', point['password'])
+        pwf = pwf.replace('_PW', point['password'])
+    else:
+        pwf = pwf.replace('_PW', '')
     if 'apName' in point:
-        pwf = pwf.replace('NAME', point['apName'])
+        pwf = pwf.replace('_NAME', point['apName'])
     else:
-        pwf = pwf.replace('NAME', '')
+        pwf = pwf.replace('_NAME', '')
     if 'verified' in point and point['verified'] == 1:
-        pwf = pwf.replace('VER', 'yes')
+        pwf = pwf.replace('_VER', 'yes')
     else:
-        pwf = pwf.replace('VER', 'no')
+        pwf = pwf.replace('_VER', 'no')
     # print(pwf)
     socket.write(pwf)
+
+reps = {'%20':' ', '%2B':' ', '+':' ', '%27':"'", '%23': '#'}
+def unescape(text):
+    for i, j in reps.items():
+        text = text.replace(i, j)
+    return text
 
 def queryParse(queryString):
       result = {}
@@ -121,8 +131,7 @@ def queryParse(queryString):
           if '=' not in pair:
               continue
           key, value = pair.split('=')
-          value = value.replace('%2B', ' ')
-          value = value.replace('+', ' ')
+          value = unescape(value)
         #   print('queryParse: ', key, value)
           result[key] = value
       return result
@@ -196,7 +205,11 @@ def err(socket, code, message):
 
 # HTTP requests come in here
 def handleQuery(socket):
-    (method, url, version) = socket.readline().split(b" ")
+    try:
+        (method, url, version) = socket.readline().split(b" ")
+    except ValueError:
+        print('invalid query')
+        return
 
     if b"?" in url:
         (path, query) = url.split(b"?", 2)
