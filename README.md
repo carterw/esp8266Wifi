@@ -1,7 +1,7 @@
 # esp8266Wifi
 The ESP8266 is a pretty amazing IoT device with built-in WiFi capability. It is the size of a postage stamp and  you can get it in single quantity for about 3 bucks on Ebay if you don't mind wiring it up yourself. A development board with breakouts and a USB port is available [on Amazon at 2 for $15](https://www.amazon.com/gp/product/B01IK9GEQG/ref=oh_aui_detailpage_o08_s00?ie=UTF8&psc=1).
 
-This project is a python application that can serve up a little website on the ESP8266 running as a WiFi access point. It can scan for other visible access points, indicates if they are open or require a password, and lets you record their password to a file on the ESP8266. Very cool that a cheap little device with ~25kb of program RAM can do this.
+This project is a python application that can serve up a little website on the ESP8266 running as a WiFi access point. It can scan for other visible access points, indicates if they are open or require a password, and lets you record their password to a file on the ESP8266. You can also mark an access point as "ignore". Very cool that a cheap little device with ~25kb of program RAM can do this.
 
 ## Motivation
 
@@ -43,7 +43,7 @@ The table will show;
 * the access point name (if not hidden)
 * whether of not it requires a password
 * the signal strength in negative decibels, lower is stronger
-* whether or not you have successfully connected to it in the "known" column (Y or N)
+* whether or not you have successfully connected to it in the "known" column, or marked it "ignore" (Y, N. or X)
 * a radio button in the Set column
 
 If you press the radio button associated with an access point you will be sent to a page where you can type in the password and an optional name for that access point.
@@ -58,9 +58,17 @@ If you press "test" the device will attempt to connect to that access point. Thi
 
 If you press "save" your input is merely saved to the file as-is with no connect attempt. Or you can "scan" and get back to the table of access points.
 
+**New feature**
+
+Some open access points don't actually have internet access or require that you log in to a web page in order to gain it. These aren't useful for the 8266, so an "ignore" button has been added to mark them.
+
 ## Caveats
 
 At the time of this writing, version 1.9 of Micropython was recently released. I've found that with the previous version the ESP8266 was able to attempt connection to other remote access points with no problem while still serving as an access point itself. With 1.9 this seems somewhat broken. If you attempt to connect and it fails, your connection to the web app is scrogged. You will need to WiFi disconnect from the 8266 device and reconnect in order to recover. The program will have recorded the results of the connect attempt, however.
+
+**New results**
+
+The very latest version of the firmware, pulled and built directly from the github repository, does not seem to have this problem!
 
 ## Acknowledgement
 

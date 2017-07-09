@@ -6,42 +6,42 @@ class AccessPoints:
     '''
     Reads/writes a parameters file in JSON format
     '''
-    rtParams = {}
-    rtParamsFilename = ''
+    apParams = {}
+    accessPointsFilename = ''
     apIndex = 0
 
     def __init__(self, filename):
-        self.rtParamsFilename = filename
+        self.accessPointsFilename = filename
 
-    def readParamsFile(self):
-        fileName = self.rtParamsFilename
+    def readApFile(self):
+        fileName = self.accessPointsFilename
         fileList = os.listdir()
         if fileName in fileList:
-            f = open(self.rtParamsFilename)
+            f = open(self.accessPointsFilename)
             data = f.read()
             f.close()
             # print(data)
-            self.rtParams = ujson.loads(data)
+            self.apParams = ujson.loads(data)
         else:
-            self.rtParams['accessPoints'] = {}
+            self.apParams['accessPoints'] = {}
             # self.setSection('accessPoints', {})
-            self.writeParamsFile()
+            self.writeApFile()
 
     def getSection(self, sectionName):
-        self.readParamsFile()        
-        if sectionName in self.rtParams:
-            section = self.rtParams[sectionName]
-            rtParams = {}
+        self.readApFile()        
+        if sectionName in self.apParams:
+            section = self.apParams[sectionName]
+            apParams = {}
             return section
         else:
             print('getSection', sectionName, ' not found')
             return None # should raise exception
     
     def setSection(self, sectionName, sectionData):
-        self.readParamsFile()
-        self.rtParams[sectionName] = sectionData
-        self.writeParamsFile()
-        rtParams = {}
+        self.readApFile()
+        self.apParams[sectionName] = sectionData
+        self.writeApFile()
+        apParams = {}
 
     def getAccessPointData(self, ssid):
         accessPoints = self.getSection('accessPoints')
@@ -57,19 +57,36 @@ class AccessPoints:
         self.setSection('accessPoints', accessPoints)
 
     def getNextAccessPoint(self):
-        # should check to make sure this element is present
         accessPoints = self.getSection('accessPoints')
-        if self.apIndex == len(accessPoints):
+        apLength = len(accessPoints)
+        if self.apIndex == apLength:
             self.apIndex = 0
-        ap = accessPoints[self.apIndex]
+        ap = next( v for i, v in enumerate(accessPoints.values()) if i == self.apIndex )
         self.apIndex += 1
-        return ap     
+        return ap    
 
-    def writeParamsFile(self):
-        f = open(self.rtParamsFilename, 'w')
-        jsonData = ujson.dumps(self.rtParams)
+    def checkAccessPointIgnore(self, point):
+        if 'verified' in point:
+            if point['verified'] == 2:
+                return True
+        return False
+
+    def getAccessPointPassword(self, ssid):
+        accessPoints = self.getSection('accessPoints')
+        password = ''
+        if ssid in accessPoints:
+            point = accessPoints[ssid]
+            # print('password found!!!', point['password'])
+            return point['password']
+        return password
+
+    def writeApFile(self):
+        f = open(self.accessPointsFilename, 'w')
+        jsonData = ujson.dumps(self.apParams)
         f.write(jsonData)
         f.close()
+
+class NetScan:
 
     def doScan(self, wlan):
         points = []

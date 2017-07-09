@@ -7,9 +7,12 @@ import network
 import machine
 import usocket
 
-import accessPoints as ap
+from accessPoints import AccessPoints
 accessPointsFile = 'accessPoints.json'
-aPoints = ap.AccessPoints(accessPointsFile)
+aPoints = AccessPoints(accessPointsFile)
+
+from accessPoints import NetScan
+netScan = NetScan()
 
 # do a little test
 point = aPoints.getAccessPointData('testSSID')
@@ -35,11 +38,7 @@ print('server at IP', ifc[0])
 pin = machine.Pin(GPIO_NUM)
 
 pin.init(pin.OUT)
-try:
-    pin.low()
-except AttributeError:
-    pin.off()
-
+pin.value(0)
 
 pwform = ''' 
 <h3>Set access point password</h3>
@@ -50,6 +49,7 @@ pwform = '''
     <span>
     <input type="submit" name="testpw" value="Test">
     <input type="submit" name="savepw" value="Save">
+    <input type="submit" name="ignore" value="Ignore">
     </span>
     <input type="hidden" name="ssid" value="_SSID">
 </form> 
@@ -73,21 +73,27 @@ def makeAPtable(points):
     pointsStr += '<form action="/getpw"" method="GET">'
     pointsStr += '<table><th>SSID</th><th>Open</th><th>Str</th><th>Known</th><th>Set</th></tr>'
 
-    for i, point in enumerate(points):
-        # print(point)
-        aPoint = aPoints.getAccessPointData(point["ssid"])
-        if 'verified' in aPoint and aPoint['verified'] == 1:
-            point['verified'] = 'Y'
-        else:
+    try:
+        for i, point in enumerate(points):
+            # print(point)
+            aPoint = aPoints.getAccessPointData(point["ssid"])
             point['verified'] = 'N'
-        radioStr = makeRadio('radioSet', point["ssid"], point["authmode"])
-        pointsStr += '<tr><td>' + point["ssid"] + '</td><td>' + point["authmode"] + '</td><td>' + point["rssi"] + '</td><td>' + point["verified"] + '</td><td>' + radioStr + '</td></tr>'
-    pointsStr += '</table>'
-    pointsStr += '</form><br>'
+            if 'verified' in aPoint:
+                if aPoint['verified'] == 1:
+                    point['verified'] = 'Y'
+                elif aPoint['verified'] == 2:
+                    point['verified'] = 'X'
+
+            radioStr = makeRadio('radioSet', point["ssid"], point["authmode"])
+            pointsStr += '<tr><td>' + point["ssid"] + '</td><td>' + point["authmode"] + '</td><td>' + point["rssi"] + '</td><td>' + point["verified"] + '</td><td>' + radioStr + '</td></tr>'
+        pointsStr += '</table>'
+        pointsStr += '</form><br>'
+    except MemoryError as merr:
+        print(merr)
     return pointsStr
 
 def emitScanTable(socket):
-    points = aPoints.doScan(sta_if)
+    points = netScan.doScan(sta_if)
     apTable = makeAPtable(points)
     socket.write(apTable)
 
@@ -111,10 +117,13 @@ def emitPWform(socket, rawQuery):
         pwf = pwf.replace('_NAME', point['apName'])
     else:
         pwf = pwf.replace('_NAME', '')
-    if 'verified' in point and point['verified'] == 1:
-        pwf = pwf.replace('_VER', 'yes')
-    else:
-        pwf = pwf.replace('_VER', 'no')
+    if 'verified' in point:
+        if point['verified'] == 1:
+            pwf = pwf.replace('_VER', 'yes')
+        elif point['verified'] == 2:
+            pwf = pwf.replace('_VER', 'ignore')
+        else:
+            pwf = pwf.replace('_VER', 'no')
     # print(pwf)
     socket.write(pwf)
 
@@ -151,14 +160,15 @@ def handleSetPW(rawQuery):
     if 'testpw' in parsedQuery:
         sta_if.active(True)
         sta_if.connect(ssid, point['password'])
-        success = aPoints.checkLoop(sta_if, 10000)
+        success = netScan.checkLoop(sta_if, 10000)
         print('checkLoop result:', success)
         if success:
             point['verified'] = 1
         else:
             point['verified'] = 0
         sta_if.active(False)
-
+    elif 'ignore' in parsedQuery:
+        point['verified'] = 2   # never use for whatever reason
     aPoints.setAccessPointData(ssid, point)
 
 # this is where we construct the response
@@ -243,17 +253,11 @@ def handleQuery(socket):
     elif method == b"POST":
         if path == b"/on":
             # print('received ON')
-            try:
-                pin.high()
-            except AttributeError:
-                pin.on()
+            pin.value(0)
             respond(socket, path, query)
         elif path == b"/off":
             # print('received OFF')
-            try:
-                pin.low()
-            except AttributeError:
-                pin.off()
+            pin.value(1)    
             respond(socket, path, query)
         elif path == b"/scan":
             # print('received scan')
