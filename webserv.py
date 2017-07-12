@@ -197,14 +197,13 @@ def respond(socket, path, query):
 
     socket.write("<br><br>")
     socket.write(" pin " + str(GPIO_NUM) + " status: ")
-    if pin.value():
+    if pin.value() == 0:
         socket.write("<span style='color:green'>OFF</span>")
-    else:
-        socket.write("<span style='color:red'>ON</span>")
-    socket.write("<br>")
-    if pin.value():
+        socket.write("<br>")
         socket.write( makeActionButton('/off', query, 'turn ON') )
     else:
+        socket.write("<span style='color:red'>ON</span>")
+        socket.write("<br>")
         socket.write( makeActionButton('/on', query, 'turn OFF') )
 
     socket.write(css.getFooter())
@@ -252,11 +251,11 @@ def handleQuery(socket):
             err(socket, "404", "Not Found")
     elif method == b"POST":
         if path == b"/on":
-            # print('received ON')
+            print('received ON')
             pin.value(0)
             respond(socket, path, query)
         elif path == b"/off":
-            # print('received OFF')
+            print('received OFF')
             pin.value(1)    
             respond(socket, path, query)
         elif path == b"/scan":
